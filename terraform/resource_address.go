@@ -75,6 +75,23 @@ func (addr *ResourceAddress) Equals(raw interface{}) bool {
 		typeMatch
 }
 
+func (addr *ResourceAddress) Includes(raw interface{}) bool {
+	other, ok := raw.(*ResourceAddress)
+	if !ok {
+		return false
+	}
+
+	if addr.Type == "" {
+		if len(other.Path) < len(addr.Path) {
+			return false
+		}
+		prefix := other.Path[:len(addr.Path)]
+		return reflect.DeepEqual(addr.Path, prefix)
+	}
+
+	return false
+}
+
 func ParseResourceIndex(s string) (int, error) {
 	if s == "" {
 		return -1, nil

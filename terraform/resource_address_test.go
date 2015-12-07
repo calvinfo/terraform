@@ -305,3 +305,88 @@ func TestResourceAddressEquals(t *testing.T) {
 		}
 	}
 }
+
+func TestResourceAddressIncludes(t *testing.T) {
+	cases := map[string]struct {
+		Address *ResourceAddress
+		Other   interface{}
+		Expect  bool
+	}{
+		"basic module": {
+			Address: &ResourceAddress{
+				Path:         []string{"a"},
+				Type:         "",
+				Name:         "",
+				InstanceType: TypePrimary,
+				Index:        0,
+			},
+			Other: &ResourceAddress{
+				Path:         []string{"a"},
+				Type:         "aws_instance",
+				Name:         "foo",
+				InstanceType: TypePrimary,
+				Index:        0,
+			},
+			Expect: true,
+		},
+		"non-module": {
+			Address: &ResourceAddress{
+				Path:         []string{"a"},
+				Type:         "aws_instance",
+				Name:         "foo",
+				InstanceType: TypePrimary,
+				Index:        0,
+			},
+			Other: &ResourceAddress{
+				Path:         []string{"a"},
+				Type:         "aws_instance",
+				Name:         "foo",
+				InstanceType: TypePrimary,
+				Index:        0,
+			},
+			Expect: false,
+		},
+		"outside module": {
+			Address: &ResourceAddress{
+				Path:         []string{"a"},
+				Type:         "",
+				Name:         "",
+				InstanceType: TypePrimary,
+				Index:        0,
+			},
+			Other: &ResourceAddress{
+				Path:         []string{"b", "a"},
+				Type:         "aws_instance",
+				Name:         "foo",
+				InstanceType: TypePrimary,
+				Index:        0,
+			},
+			Expect: false,
+		},
+		"nested module": {
+			Address: &ResourceAddress{
+				Path:         []string{"a"},
+				Type:         "",
+				Name:         "",
+				InstanceType: TypePrimary,
+				Index:        0,
+			},
+			Other: &ResourceAddress{
+				Path:         []string{"a", "b"},
+				Type:         "aws_instance",
+				Name:         "foo",
+				InstanceType: TypePrimary,
+				Index:        0,
+			},
+			Expect: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		actual := tc.Address.Includes(tc.Other)
+		if actual != tc.Expect {
+			t.Fatalf("%q: expected includes: %t, got %t for:\n%#v\n%#v",
+				tn, tc.Expect, actual, tc.Address, tc.Other)
+		}
+	}
+}

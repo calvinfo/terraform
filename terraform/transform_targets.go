@@ -99,7 +99,7 @@ func (t *TargetsTransformer) nodeIsTarget(
 	}
 	addr := r.ResourceAddress()
 	for _, targetAddr := range addrs {
-		if targetAddr.Equals(addr) {
+		if targetAddr.Equals(addr) || targetAddr.Includes(addr) {
 			return true
 		}
 	}
