@@ -17,7 +17,7 @@ type PlanCommand struct {
 
 func (c *PlanCommand) Run(args []string) int {
 	var destroy, refresh, detailed bool
-	var outPath string
+	var outPath, datadir string
 	var moduleDepth int
 
 	args = c.Meta.process(args, true)
@@ -26,6 +26,7 @@ func (c *PlanCommand) Run(args []string) int {
 	cmdFlags.BoolVar(&destroy, "destroy", false, "destroy")
 	cmdFlags.BoolVar(&refresh, "refresh", true, "refresh")
 	c.addModuleDepthFlag(cmdFlags, &moduleDepth)
+	cmdFlags.StringVar(&datadir, "datadir", DefaultDataDir, "datadir")
 	cmdFlags.StringVar(&outPath, "out", "", "path")
 	cmdFlags.IntVar(
 		&c.Meta.parallelism, "parallelism", DefaultParallelism, "parallelism")
@@ -57,6 +58,7 @@ func (c *PlanCommand) Run(args []string) int {
 
 	countHook := new(CountHook)
 	c.Meta.extraHooks = []terraform.Hook{countHook}
+	c.dataDir = datadir
 
 	ctx, _, err := c.Context(contextOpts{
 		Destroy:     destroy,
@@ -64,6 +66,7 @@ func (c *PlanCommand) Run(args []string) int {
 		StatePath:   c.Meta.statePath,
 		Parallelism: c.Meta.parallelism,
 	})
+
 	if err != nil {
 		c.Ui.Error(err.Error())
 		return 1

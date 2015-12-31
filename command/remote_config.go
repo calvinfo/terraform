@@ -33,8 +33,12 @@ func (c *RemoteConfigCommand) Run(args []string) int {
 	args = c.Meta.process(args, false)
 	config := make(map[string]string)
 	cmdFlags := flag.NewFlagSet("remote", flag.ContinueOnError)
+
+	var dataDir string
+
 	cmdFlags.BoolVar(&c.conf.disableRemote, "disable", false, "")
 	cmdFlags.BoolVar(&c.conf.pullOnDisable, "pull", true, "")
+	cmdFlags.StringVar(&dataDir, "datadir", DefaultDataDir, "data directory")
 	cmdFlags.StringVar(&c.conf.statePath, "state", DefaultStateFilename, "path")
 	cmdFlags.StringVar(&c.conf.backupPath, "backup", "", "path")
 	cmdFlags.StringVar(&c.remoteConf.Type, "backend", "atlas", "")
@@ -44,6 +48,9 @@ func (c *RemoteConfigCommand) Run(args []string) int {
 		c.Ui.Error(fmt.Sprintf("\nError parsing CLI flags: %s", err))
 		return 1
 	}
+
+	// Set the data directory
+	c.dataDir = dataDir
 
 	// Lowercase the type
 	c.remoteConf.Type = strings.ToLower(c.remoteConf.Type)

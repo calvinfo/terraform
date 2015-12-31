@@ -17,11 +17,13 @@ type GetCommand struct {
 
 func (c *GetCommand) Run(args []string) int {
 	var update bool
+	var datadir string
 
 	args = c.Meta.process(args, false)
 
 	cmdFlags := flag.NewFlagSet("get", flag.ContinueOnError)
 	cmdFlags.BoolVar(&update, "update", false, "update")
+	cmdFlags.StringVar(&datadir, "datadir", DefaultDataDir, "datadir")
 	cmdFlags.Usage = func() { c.Ui.Error(c.Help()) }
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
@@ -47,6 +49,8 @@ func (c *GetCommand) Run(args []string) int {
 	if update {
 		mode = module.GetModeUpdate
 	}
+
+	c.dataDir = datadir
 
 	_, _, err := c.Context(contextOpts{
 		Path:    path,
